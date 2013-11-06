@@ -32,7 +32,10 @@ namespace TcpProxy
         public Session(Socket socket)
         {
             m_socket = socket;
-            m_buffer = TcpProxy.BufferPool.Get();
+            m_socket.NoDelay = true;
+            m_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+
+            m_buffer = BufferPool.Get();
             m_disposed = false;
         }
 
@@ -45,7 +48,7 @@ namespace TcpProxy
             m_socket.BeginReceive(m_buffer, 0, m_buffer.Length, SocketFlags.None, out outError, EndReceive, null);
 
             if(outError != SocketError.Success)
-                Close();
+                Dispose();
         }
 
         private void EndReceive(IAsyncResult iar)
@@ -58,7 +61,7 @@ namespace TcpProxy
 
             if (size == 0 || outError != SocketError.Success)
             {
-                Close();
+                Dispose();
                 return;
             }
 
@@ -82,7 +85,7 @@ namespace TcpProxy
 
                 if (size == 0 || outError != SocketError.Success)
                 {
-                    Close();
+                    Dispose();
                     return;
                 }
 
@@ -90,7 +93,7 @@ namespace TcpProxy
             }
         }
 
-        public void Close()
+        public void Dispose()
         {
             if (!m_disposed)
             {
@@ -99,7 +102,7 @@ namespace TcpProxy
                 m_socket.Shutdown(SocketShutdown.Both);
                 m_socket.Close();
 
-                TcpProxy.BufferPool.Put(m_buffer);
+                BufferPool.Put(m_buffer);
 
                 if (OnDisconnected != null)
                     OnDisconnected();
@@ -107,11 +110,6 @@ namespace TcpProxy
                 OnDataReceived = null;
                 OnDisconnected = null;
             }
-        }
-
-        public void Dispose()
-        {
-            Close();
         }
     }
 }

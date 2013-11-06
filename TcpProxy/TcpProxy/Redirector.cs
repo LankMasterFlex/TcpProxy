@@ -44,8 +44,8 @@ namespace TcpProxy
             }
             catch (SocketException se)
             {
-                m_client.Close();
-                Console.WriteLine("Connection bridge failed: {0} ({1})",se.ErrorCode,m_name);
+                m_client.Dispose();
+                Console.WriteLine("Connection bridge failed with {0} ({1})",se.ErrorCode,m_name);
             }
         }
 
@@ -67,10 +67,10 @@ namespace TcpProxy
                 m_alive = false;
 
                 if (m_client != null)
-                    m_client.Close();
+                    m_client.Dispose();
 
                 if (m_server != null)
-                    m_server.Close();
+                    m_server.Dispose();
 
                 Console.WriteLine("Proxy session ended ({0})", m_name);
             }

@@ -5,35 +5,28 @@ namespace TcpProxy
 {
     internal sealed class BufferPool
     {
-        private int m_bufferSize;
-        private ConcurrentBag<byte[]> m_objects;
+        public const int BufferSize = 1024;
+        private static ConcurrentBag<byte[]> objectPool = new ConcurrentBag<byte[]>();
 
-        public BufferPool(int bufferSize)
-        {
-            m_bufferSize = bufferSize;
-            m_objects = new ConcurrentBag<byte[]>();
-        }
-
-        public byte[] Get()
+        public static byte[] Get()
         {
             byte[] buffer;
 
-            if (m_objects.TryTake(out buffer) == false)
-                buffer = new byte[m_bufferSize];
+            if (objectPool.TryTake(out buffer) == false)
+                buffer = new byte[BufferSize];
 
             return buffer;
         }
-
-        public void Put(byte[] buffer)
+        public static void Put(byte[] buffer)
         {
             if (buffer == null)
                 throw new ArgumentNullException("buffer");
 
-            if (buffer.Length != m_bufferSize)
+            if (buffer.Length != BufferSize)
                 throw new ArgumentOutOfRangeException("buffer");
 
-            Array.Clear(buffer, 0, m_bufferSize);
-            m_objects.Add(buffer);
+            Array.Clear(buffer, 0, BufferSize);
+            objectPool.Add(buffer);
         }
     }
 }

@@ -1,15 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
 namespace TcpProxy
 {
-    internal sealed class TcpProxy
+    internal sealed class Program
     {
-        public static BufferPool BufferPool { get; private set; }
-
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => File.WriteAllText("Exceptions.txt", e.ExceptionObject.ToString());
+
             if (args.Length < 3)
             {
                 Console.WriteLine("Usage : TcpProxy <local port> <remote host> <remote port>");
@@ -19,8 +20,6 @@ namespace TcpProxy
             int localPort = Convert.ToInt32(args[0]);
             string remoteHost = args[1];
             int remotePort = Convert.ToInt32(args[2]);
-
-            BufferPool = new BufferPool(1024);
 
             var listener = new TcpListener(IPAddress.Any, localPort);
             listener.Start();
