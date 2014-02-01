@@ -10,14 +10,6 @@ namespace TcpProxy
 
         private bool m_disposed;
 
-        public byte[] Buffer
-        {
-            get
-            {
-                return m_buffer;
-            }
-        }
-
         public bool Disposed
         {
             get
@@ -32,9 +24,6 @@ namespace TcpProxy
         public Session(Socket socket)
         {
             m_socket = socket;
-            m_socket.NoDelay = true;
-            m_socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-
             m_buffer = BufferPool.Get();
             m_disposed = false;
         }
