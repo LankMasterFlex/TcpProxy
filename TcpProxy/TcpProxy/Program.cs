@@ -48,6 +48,8 @@ namespace TcpProxy
 
         private static void AcceptCallback(IAsyncResult iar)
         {
+            allDone.Set();
+
             try
             {
                 var socket = listener.EndAccept(iar);
